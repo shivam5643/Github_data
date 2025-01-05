@@ -1,18 +1,19 @@
-// src/App.jsx
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import RepositoryPage from "./pages/RepositoryPage";
-import RepoDetails from "./pages/RepoDetails";
-import FollowersPage from "./pages/FollowersPage";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import RepoList from './pages/RepoList';
+import RepoDetails from './pages/RepoDetails';
+import Followers from './pages/Followers';
+// import ErrorPage from './pages/ErrorPage';
 
 const App = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/repos/:username" element={<RepositoryPage />} />
-      <Route path="/repos/:username/:repoName" element={<RepoDetails />} />
-      <Route path="/followers/:username" element={<FollowersPage />} />
+      <Route path="/repos/:username" element={<RepoList />} />
+      <Route path="/repos/:username/:repo" element={<RepoDetails />} />
+      <Route path="/followers/:username" element={<Followers />} />
+      {/* <Route path="*" element={<ErrorPage />} /> */}
     </Routes>
   </Router>
 );
