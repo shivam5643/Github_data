@@ -1,7 +1,6 @@
 import User from '../models/userModel.js';
 import axios from 'axios';
 
-// Save a user to the database
 export const saveUser = async (req, res) => {
   const { username } = req.body;
 
@@ -11,7 +10,6 @@ export const saveUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Request data from GitHub using axios
     const githubUserData = await axios.get(`https://api.github.com/users/${username}`)
       .then((response) => response.data);
 
@@ -26,8 +24,8 @@ export const saveUser = async (req, res) => {
       bio: githubUserData.bio,
       public_repos: githubUserData.public_repos,
       public_gists: githubUserData.public_gists,
-      followers: githubUserData.followers,  // Number of followers
-      following: githubUserData.following,  // Number of following
+      followers: githubUserData.followers,
+      following: githubUserData.following,
       avatar_url: githubUserData.avatar_url,
       created_at: githubUserData.created_at,
     });
@@ -40,43 +38,34 @@ export const saveUser = async (req, res) => {
   }
 };
 
-// Find mutual followers and add them as friends
 export const findMutualFollowersAndAddAsFriends = async (req, res) => {
   const { username } = req.params;
 
   try {
-    // Step 1: Find the user by their username
     const user = await User.findOne({ username }).populate('followers following', 'username _id');
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Step 2: Find all users the user follows
     const following = user.following;
 
-    // Step 3: Iterate over each user they follow and check if they follow the current user back
     for (const followedUser of following) {
-      // Step 4: Check if the followed user follows back the current user
       const isMutual = followedUser.following.some(
         (follower) => follower.username === user.username
       );
 
-      // Step 5: If mutual following is found, add them as friends
       if (isMutual) {
-        // Add the followed user as a friend if not already in the friends array
         if (!user.friends.includes(followedUser._id)) {
           user.friends.push(followedUser._id);
         }
 
-        // Also add the current user as a friend for the followed user
         if (!followedUser.friends.includes(user._id)) {
           followedUser.friends.push(user._id);
         }
       }
     }
 
-    // Step 6: Save the updated user and followed users' documents
     await user.save();
 
     for (const followedUser of following) {
@@ -90,22 +79,19 @@ export const findMutualFollowersAndAddAsFriends = async (req, res) => {
   }
 };
 
-// Search users by username, location, or both
 export const searchUsers = async (req, res) => {
   const { username, location } = req.query;
 
   try {
-    // Construct the query object based on input
     const query = {};
     if (username) {
-      query.username = { $regex: username, $options: "i" }; // Case-insensitive regex
+      query.username = { $regex: username, $options: "i" };
     }
     if (location) {
       query.location = { $regex: location, $options: "i" };
     }
 
-    // Fetch matching users from the database
-    const users = await User.find(query).select("-__v"); // Exclude __v field
+    const users = await User.find(query).select("-__v");
     res.status(200).json(users);
   } catch (err) {
     console.error("Error searching users:", err);
@@ -113,7 +99,6 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-// Soft delete a user
 export const deleteUser = async (req, res) => {
   const { username } = req.params;
 
@@ -135,7 +120,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// Update a user
 export const updateUser = async (req, res) => {
   const { username } = req.params;
   const updates = req.body;
@@ -155,7 +139,6 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Get all users sorted by a field
 export const getUsers = async (req, res) => {
   const { sortBy } = req.query;
 
